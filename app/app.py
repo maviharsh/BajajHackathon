@@ -9,7 +9,7 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 import os
 import tempfile
-from core.rag_handler_advanced import get_structured_rag_response
+from core.rag_handler import get_structured_rag_response
 from core.processing import process_document_for_rag, LOADER_MAPPING
 
 # --- 1. Page Configuration ---
