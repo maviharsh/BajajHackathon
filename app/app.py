@@ -35,7 +35,7 @@ def get_vector_store_from_file(uploaded_file):
 
 # --- 3. UI Layout ---
 st.title("🚀 Interactive Document Decision Engine")
-st.markdown("Upload a policy document to begin. The chat will remain active even if you refresh the page.")
+st.markdown("Upload a policy document to begin.")
 
 # --- 4. Sidebar for Document Upload ---
 with st.sidebar:
