@@ -1,5 +1,9 @@
-langchain
-chromadb
-pypdf 
-python-dotenv
 streamlit
+langchain
+langchain-openai
+langchain-community
+chromadb
+pypdf
+unstructured
+python-dotenv
+lxml
