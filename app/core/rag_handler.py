@@ -6,7 +6,7 @@ from langchain.chains import RetrievalQA
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from langchain_community.vectorstores import Chroma
-
+#added comment
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
