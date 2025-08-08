@@ -1,4 +1,8 @@
+# core/processing.py
+
 import os
+import tempfile
+import requests # Add this import
 from langchain_community.document_loaders import (
     PyPDFLoader,
     UnstructuredWordDocumentLoader,
@@ -9,7 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 
-# --- Mapping from file extensions to loaders ---
+# --- Mapping from file extensions to loaders remains the same ---
 LOADER_MAPPING = {
     ".pdf": PyPDFLoader,
     ".docx": UnstructuredWordDocumentLoader,
@@ -18,41 +22,48 @@ LOADER_MAPPING = {
     ".eml": UnstructuredEmailLoader,
 }
 
-def load_document(temp_filepath: str):
+def load_document(filepath: str):
+    """Loads a single document from a file path using the correct loader."""
+    ext = "." + filepath.rsplit(".", 1)[-1].lower()
+    if ext in LOADER_MAPPING:
+        loader = LOADER_MAPPING[ext](filepath)
+        return loader.load()
+    raise ValueError(f"Unsupported file type: {ext}")
+
+def download_and_process_document(url: str):
     """
-    Loads a single document from a temporary file path using the correct loader.
+    Downloads a document from a URL, processes it, and returns text chunks.
     """
-    # Get the file extension to determine the loader
-    file_ext = os.path.splitext(temp_filepath)[1].lower()
-    loader_class = LOADER_MAPPING.get(file_ext)
+    try:
+        response = requests.get(url, stream=True)
+        response.raise_for_status()  # Raise an exception for bad status codes
 
-    if loader_class:
-        try:
-            loader = loader_class(temp_filepath)
-            documents = loader.load()
-            return documents
-        except Exception as e:
-            print(f"Error loading file {temp_filepath}: {e}")
-            return None
-    else:
-        raise ValueError(f"Unsupported file type: {file_ext}")
+        # Get file extension from URL
+        file_ext = os.path.splitext(url)[1].lower()
 
-def process_document_for_rag(temp_filepath: str):
-    """
-    Processes a single uploaded document and returns an in-memory vector store.
-    """
-    documents = load_document(temp_filepath)
-    if not documents:
-        return None
+        # Create a temporary file to store the downloaded content
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+            tmp_file.write(response.content)
+            tmp_filepath = tmp_file.name
+        
+        # Load the document from the temporary file
+        documents = load_document(tmp_filepath)
+        
+        # Clean up the temporary file
+        os.remove(tmp_filepath)
+        
+        if not documents:
+            return []
 
-    # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
-    split_texts = text_splitter.split_documents(documents)
+        # Split documents into chunks
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
+        split_texts = text_splitter.split_documents(documents)
+        
+        return split_texts
 
-    # Initialize embedding model
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-
-    # Create an in-memory Chroma vector store
-    vector_store = Chroma.from_documents(documents=split_texts, embedding=embeddings)
-    
-    return vector_store
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading document from {url}: {e}")
+        return []
+    except Exception as e:
+        print(f"Error processing document from {url}: {e}")
+        return []

@@ -10,3 +10,5 @@ data/vector_store/
 
 .idea/
 .vscode/
+
+data/raw/
