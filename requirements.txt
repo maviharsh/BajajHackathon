@@ -8,3 +8,4 @@ chromadb
 pysqlite3-binary
 unstructured[pdf,docx,eml] 
 requests
+langchain-community
