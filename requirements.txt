@@ -6,5 +6,5 @@ pydantic
 python-dotenv
 chromadb
 pysqlite3-binary
-unstructured[all-docs]
+unstructured[pdf,docx,eml] 
 requests
