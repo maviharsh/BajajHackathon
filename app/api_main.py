@@ -16,8 +16,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 
 # Import your existing, modified logic
-from core.processing import download_and_process_document
-from core.rag_handler import get_structured_rag_response
+from .core.processing import download_and_process_document
+from .core.rag_handler import get_structured_rag_response
 
 # --- 1. Initialize Application and Load Environment Variables ---
 app = FastAPI(
